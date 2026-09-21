@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apprendre l'arabe classique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-ar">تَعَلَّمِ العَرَبِيَّةَ</span>
+      <span class="brand-fr">Apprendre l'arabe classique</span>
+    </div>
+    <nav class="tabs" id="main-nav">
+      <button data-route="accueil" class="tab-btn active">Accueil</button>
+      <button data-route="alphabet" class="tab-btn">Alphabet</button>
+      <button data-route="harakat" class="tab-btn">Harakat</button>
+      <button data-route="tanwin" class="tab-btn">Tanwin</button>
+      <button data-route="lecture" class="tab-btn">Lecture</button>
+      <button data-route="quiz-final" class="tab-btn">Quiz final</button>
+      <button data-route="programme" class="tab-btn">Programme</button>
+    </nav>
+  </header>
+
+  <main id="view-root" class="view-root">
+    <p class="loading">Chargement…</p>
+  </main>
+
+  <footer class="app-footer">
+    Programme d'apprentissage — Arabe classique · Phase 1 : l'alphabet et les bases
+  </footer>
+</div>
+
+<div id="letter-modal" class="modal hidden">
+  <div class="modal-card">
+    <button class="modal-close" id="letter-modal-close" aria-label="Fermer">×</button>
+    <div id="letter-modal-body"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
