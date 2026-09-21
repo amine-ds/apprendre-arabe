@@ -24,6 +24,80 @@ const QURAN_QUIZ = [
 
 const STORAGE_KEY = 'arabicAppProgress_v2';
 
+const MASCOT_TIPS = [
+  "Le savoir est une lumière : عِلْمٌ نُورٌ ! 💡",
+  "Écoute bien chaque mot avec le bouton 🔊 !",
+  "Un petit exercice chaque jour et tu deviendras un champion de l'arabe ! 🏆",
+  "N'oublie pas : الصَّبْرُ مِفْتَاحُ الْفَرَجِ — la patience est la clé du succès !",
+  "Essaie de lire à voix haute, ça aide beaucoup ! 🗣️",
+  "Bravo d'être ici, chaque étape te rapproche du but ! 🐫",
+  "Astuce : reviens sur les leçons que tu trouves difficiles autant de fois que tu veux.",
+];
+const MASCOT_HAPPY = ['🐫', '😄', '🎉', '🥳'];
+const MASCOT_NEUTRAL = '🐫';
+const MASCOT_THINK = '🤔';
+const MASCOT_SAD = '😅';
+
+function setMascot(face, message) {
+  const faceEl = document.getElementById('mascot-face');
+  const bubbleEl = document.getElementById('mascot-bubble');
+  if (!faceEl || !bubbleEl) return;
+  faceEl.textContent = face;
+  bubbleEl.textContent = message;
+  bubbleEl.style.animation = 'none';
+  // eslint-disable-next-line no-unused-expressions
+  bubbleEl.offsetHeight;
+  bubbleEl.style.animation = null;
+}
+
+function mascotRandomTip() {
+  setMascot(MASCOT_NEUTRAL, MASCOT_TIPS[Math.floor(Math.random() * MASCOT_TIPS.length)]);
+}
+
+function playTone(freq, duration, type) {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.16, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration / 1000);
+    osc.start();
+    osc.stop(ctx.currentTime + duration / 1000);
+    setTimeout(() => ctx.close(), duration + 80);
+  } catch (e) { /* audio non disponible */ }
+}
+
+function playCorrectSound() { playTone(880, 120, 'sine'); setTimeout(() => playTone(1175, 180, 'sine'), 110); }
+function playWrongSound() { playTone(220, 280, 'sawtooth'); }
+
+const CONFETTI_COLORS = ['#ff9f1c', '#14b8a6', '#f472b6', '#fbbf24', '#60a5fa', '#a78bfa'];
+
+function confettiBurst() {
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.background = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+    p.style.animationDelay = (Math.random() * 0.3) + 's';
+    p.style.transform = `rotate(${Math.random() * 360}deg)`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 2500);
+  }
+}
+
+function starsForPct(pct) {
+  const count = pct >= 90 ? 3 : (pct >= 70 ? 2 : (pct >= 40 ? 1 : 0));
+  const stars = [];
+  for (let i = 0; i < 3; i++) stars.push(i < count ? '⭐' : '☆');
+  return stars;
+}
+
 const DATA = {
   letters: [], harakat: [], longVowels: [], tanwin: [], simpleLetters: [], readingWords: [], curriculum: [],
   phase2: { pronouns: [], gender_number: [], nominal_sentences: [], verbal_sentences: [], cases: [] },
@@ -176,6 +250,15 @@ const ROUTES = {
   programme: renderProgramme,
 };
 
+const ROUTE_GREETINGS = {
+  accueil: 'Salut ! Prêt à apprendre l’arabe avec moi ? 🎉',
+  phase1: 'On explore l’alphabet ensemble ! 🔤',
+  phase2: 'La grammaire, c’est comme un jeu de construction ! ✍️',
+  phase3: 'Plein de nouveaux mots à découvrir ! 📚',
+  phase4: 'Niveau avancé, tu es un champion ! 🌟',
+  programme: 'Voici toute la carte de ton aventure ! 🗺️',
+};
+
 function navigate(route) {
   currentRoute = route;
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -184,6 +267,7 @@ function navigate(route) {
   const root = document.getElementById('view-root');
   root.innerHTML = '';
   (ROUTES[route] || renderAccueil)(root);
+  setMascot(MASCOT_NEUTRAL, ROUTE_GREETINGS[route] || MASCOT_TIPS[0]);
   window.scrollTo(0, 0);
 }
 
@@ -232,11 +316,15 @@ function runQuiz(root, questions, opts) {
           feedback.textContent = 'Bonne réponse !';
           feedback.className = 'feedback-line correct';
           state.score += 1;
+          playCorrectSound();
+          setMascot(MASCOT_HAPPY[Math.floor(Math.random() * MASCOT_HAPPY.length)], 'Bravo, continue comme ça ! 🎉');
         } else {
           optBtn.classList.add('wrong');
           optionsBox.children[q.correctIndex].classList.add('correct');
           feedback.textContent = `Raté — la bonne réponse était "${q.options[q.correctIndex]}".`;
           feedback.className = 'feedback-line wrong';
+          playWrongSound();
+          setMascot(MASCOT_THINK, 'Pas grave, on retient la bonne réponse et on continue !');
         }
         const nextBtn = el('button', { class: 'btn', style: 'margin-top:16px;display:block;margin-left:auto;margin-right:auto;' },
           state.index + 1 < questions.length ? 'Suivant' : 'Voir le résultat');
@@ -256,11 +344,18 @@ function runQuiz(root, questions, opts) {
     panel.appendChild(el('div', { class: 'quiz-result' },
       el('div', null, 'Résultat'),
       el('div', { class: `score ${pass ? 'pass' : 'fail'}` }, `${pct}%`),
+      el('div', { class: 'star-row' }, starsForPct(pct).map(s => el('span', null, s))),
       el('div', { class: 'lead' }, `${state.score} / ${questions.length} bonnes réponses`),
       pass ? el('p', null, opts.passMessage || 'Bravo, objectif atteint !')
         : el('p', null, opts.failMessage || 'Continue à t’entraîner, tu vas y arriver.'),
       el('button', { class: 'btn', onclick: () => navigate(currentRoute) }, 'Retour'),
     ));
+    if (pass) {
+      confettiBurst();
+      setMascot('🎉', opts.passMessage || 'Bravo, objectif atteint !');
+    } else {
+      setMascot(MASCOT_SAD, opts.failMessage || 'Continue à t’entraîner, tu vas y arriver.');
+    }
     if (opts.onFinish) opts.onFinish(pct, pass);
   }
 
@@ -1241,6 +1336,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btn = e.target.closest('.tab-btn');
     if (btn) navigate(btn.dataset.route);
   });
+  document.getElementById('mascot-face').addEventListener('click', mascotRandomTip);
   await loadData();
   navigate('accueil');
 });
