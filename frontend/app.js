@@ -133,6 +133,10 @@ function defaultProgress() {
     morphologySeen: false, rhetoricSeen: false,
     quranSeen: [],
     phase4FinalBest: 0, phase4Complete: false,
+
+    xp: 0, lastVisitDate: null, streak: 0, badges: [],
+    hadPerfectQuiz: false, memoryGamesWon: 0, lettersTraced: [],
+    lastChallengeDate: null,
   };
 }
 
@@ -163,6 +167,81 @@ function addUnique(arrKey, value) {
   }
 }
 
+/* ---------- Gamification : XP, niveaux, série, badges ---------- */
+
+const LEVELS = [
+  { xp: 0, title: 'Débutant 🌱' },
+  { xp: 100, title: 'Apprenti 📖' },
+  { xp: 300, title: 'Explorateur 🧭' },
+  { xp: 600, title: 'Savant 🎓' },
+  { xp: 1000, title: 'Champion 🏆' },
+  { xp: 1500, title: 'Maître de l’arabe 👑' },
+];
+
+function levelInfo(xp) {
+  let idx = 0;
+  for (let i = 0; i < LEVELS.length; i++) { if (xp >= LEVELS[i].xp) idx = i; }
+  return { level: idx + 1, title: LEVELS[idx].title };
+}
+
+const BADGES = [
+  { id: 'first_letter', icon: '🔤', label: 'Première lettre apprise', check: p => p.lettersSeen.length >= 1 },
+  { id: 'alphabet_master', icon: '📜', label: 'Alphabet complet exploré', check: p => p.lettersSeen.length >= 28 },
+  { id: 'tracer_5', icon: '✍️', label: '5 lettres tracées', check: p => (p.lettersTraced || []).length >= 5 },
+  { id: 'tracer_all', icon: '🖊️', label: 'Toutes les lettres tracées', check: p => (p.lettersTraced || []).length >= 28 },
+  { id: 'phase1_done', icon: '🥇', label: 'Phase 1 terminée', check: p => p.phase1Complete },
+  { id: 'phase2_done', icon: '🥈', label: 'Phase 2 terminée', check: p => p.phase2Complete },
+  { id: 'phase3_done', icon: '🥉', label: 'Phase 3 terminée', check: p => p.phase3Complete },
+  { id: 'phase4_done', icon: '👑', label: 'Phase 4 terminée', check: p => p.phase4Complete },
+  { id: 'all_phases', icon: '🏆', label: 'Programme complet !', check: p => p.phase1Complete && p.phase2Complete && p.phase3Complete && p.phase4Complete },
+  { id: 'perfect_quiz', icon: '💯', label: 'Quiz parfait (100 %)', check: p => p.hadPerfectQuiz },
+  { id: 'streak_3', icon: '🔥', label: '3 jours de suite', check: p => p.streak >= 3 },
+  { id: 'streak_7', icon: '🔥🔥', label: '7 jours de suite', check: p => p.streak >= 7 },
+  { id: 'vocab_5cat', icon: '📚', label: '5 catégories de vocabulaire', check: p => p.vocabCategoriesDone.length >= 5 },
+  { id: 'memory_win', icon: '🧠', label: 'Jeu de mémoire réussi', check: p => p.memoryGamesWon >= 1 },
+];
+
+function renderXpWidget() {
+  const lvl = levelInfo(PROGRESS.xp);
+  const levelEl = document.getElementById('xp-level-badge');
+  const streakEl = document.getElementById('xp-streak-badge');
+  if (levelEl) levelEl.textContent = `${lvl.title} · ${PROGRESS.xp} XP`;
+  if (streakEl) streakEl.textContent = `🔥 ${PROGRESS.streak}`;
+}
+
+function checkBadges() {
+  const newly = BADGES.filter(b => !PROGRESS.badges.includes(b.id) && b.check(PROGRESS));
+  if (newly.length) {
+    updateProgress({ badges: [...PROGRESS.badges, ...newly.map(b => b.id)] });
+    confettiBurst();
+    setMascot('🏅', `Nouveau badge débloqué : ${newly[0].label} !`);
+  }
+  renderXpWidget();
+}
+
+function addXP(n) {
+  const prevLevel = levelInfo(PROGRESS.xp).level;
+  updateProgress({ xp: PROGRESS.xp + n });
+  const newLevel = levelInfo(PROGRESS.xp).level;
+  if (newLevel > prevLevel) {
+    confettiBurst();
+    setMascot('🎉', `Niveau supérieur ! Tu es maintenant ${levelInfo(PROGRESS.xp).title} !`);
+  }
+  checkBadges();
+}
+
+function updateStreak() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (PROGRESS.lastVisitDate === today) { renderXpWidget(); return; }
+  let streak = 1;
+  if (PROGRESS.lastVisitDate) {
+    const diffDays = Math.round((new Date(today) - new Date(PROGRESS.lastVisitDate)) / 86400000);
+    if (diffDays === 1) streak = PROGRESS.streak + 1;
+  }
+  updateProgress({ lastVisitDate: today, streak });
+  checkBadges();
+}
+
 /* ---------- Utils ---------- */
 
 function el(tag, attrs, ...children) {
@@ -172,6 +251,7 @@ function el(tag, attrs, ...children) {
       if (k === 'class') node.className = v;
       else if (k === 'html') node.innerHTML = v;
       else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2), v);
+      else if (typeof v === 'boolean') { if (v) node.setAttribute(k, ''); }
       else node.setAttribute(k, v);
     }
   }
@@ -248,6 +328,8 @@ const ROUTES = {
   phase3: renderPhase3,
   phase4: renderPhase4,
   programme: renderProgramme,
+  badges: renderBadges,
+  defi: renderDefi,
 };
 
 const ROUTE_GREETINGS = {
@@ -268,6 +350,7 @@ function navigate(route) {
   root.innerHTML = '';
   (ROUTES[route] || renderAccueil)(root);
   setMascot(MASCOT_NEUTRAL, ROUTE_GREETINGS[route] || MASCOT_TIPS[0]);
+  renderXpWidget();
   window.scrollTo(0, 0);
 }
 
@@ -317,6 +400,7 @@ function runQuiz(root, questions, opts) {
           feedback.className = 'feedback-line correct';
           state.score += 1;
           playCorrectSound();
+          addXP(10);
           setMascot(MASCOT_HAPPY[Math.floor(Math.random() * MASCOT_HAPPY.length)], 'Bravo, continue comme ça ! 🎉');
         } else {
           optBtn.classList.add('wrong');
@@ -350,10 +434,13 @@ function runQuiz(root, questions, opts) {
         : el('p', null, opts.failMessage || 'Continue à t’entraîner, tu vas y arriver.'),
       el('button', { class: 'btn', onclick: () => navigate(currentRoute) }, 'Retour'),
     ));
+    if (pct === 100) updateProgress({ hadPerfectQuiz: true });
     if (pass) {
       confettiBurst();
+      addXP(30);
       setMascot('🎉', opts.passMessage || 'Bravo, objectif atteint !');
     } else {
+      checkBadges();
       setMascot(MASCOT_SAD, opts.failMessage || 'Continue à t’entraîner, tu vas y arriver.');
     }
     if (opts.onFinish) opts.onFinish(pct, pass);
@@ -424,6 +511,16 @@ function renderAccueil(root) {
   root.appendChild(el('p', { class: 'lead' },
     "Programme basé sur le cursus marocain, en 4 phases : de l'alphabet jusqu'à la lecture avancée."));
 
+  const today = new Date().toISOString().slice(0, 10);
+  const doneToday = PROGRESS.lastChallengeDate === today;
+  const lvl = levelInfo(PROGRESS.xp);
+  root.appendChild(el('div', { class: 'card', style: 'display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;' },
+    el('div', null,
+      el('strong', null, `${lvl.title} · ${PROGRESS.xp} XP`),
+      el('div', { class: 'lead' }, `🔥 Série de ${PROGRESS.streak} jour(s) · ${PROGRESS.badges.length}/${BADGES.length} badges`)),
+    el('button', { class: `btn ${doneToday ? 'secondary' : ''}`, disabled: doneToday, onclick: () => navigate('defi') },
+      doneToday ? '✅ Défi du jour fait' : '🎯 Défi du jour')));
+
   const completedPhases = [1, 2, 3, 4].filter(id => PROGRESS[`phase${id}Complete`]).length;
   root.appendChild(el('h2', null, 'Ta progression globale'));
   root.appendChild(el('div', { class: 'progress-bar-track' },
@@ -492,6 +589,7 @@ function renderPhase1(root) {
     lead: '4 à 6 semaines : les 28 lettres, les harakat, le tanwin, la lecture syllabique.',
     tabs: [
       { key: 'alphabet', label: 'Alphabet' },
+      { key: 'tracer', label: 'Tracer ✍️', done: PROGRESS.lettersTraced.length >= DATA.letters.length },
       { key: 'harakat', label: 'Harakat' },
       { key: 'tanwin', label: 'Tanwin' },
       { key: 'lecture', label: 'Lecture' },
@@ -501,12 +599,91 @@ function renderPhase1(root) {
     onSelect: (k) => { phase1Tab = k; navigate('phase1'); },
     render: (content) => {
       if (phase1Tab === 'alphabet') renderAlphabetSection(content);
+      else if (phase1Tab === 'tracer') renderTracerSection(content);
       else if (phase1Tab === 'harakat') renderHarakatSection(content);
       else if (phase1Tab === 'tanwin') renderTanwinSection(content);
       else if (phase1Tab === 'lecture') renderLectureSection(content);
       else renderQuizFinalIntro(content);
     },
   });
+}
+
+let traceLetterIndex = 0;
+
+function renderTracerSection(root) {
+  root.appendChild(el('p', { class: 'lead' }, "Trace la lettre avec la souris ou le doigt, en suivant le contour affiché en transparence."));
+  const letter = DATA.letters[traceLetterIndex];
+  if (!letter) return;
+  const done = PROGRESS.lettersTraced.includes(letter.order);
+
+  root.appendChild(el('div', { class: 'trace-toolbar' },
+    el('button', { class: 'btn secondary small', onclick: () => { traceLetterIndex = (traceLetterIndex - 1 + DATA.letters.length) % DATA.letters.length; navigate('phase1'); } }, '← Précédente'),
+    el('span', { class: 'quiz-progress' }, `Lettre ${traceLetterIndex + 1} / ${DATA.letters.length}`),
+    el('button', { class: 'btn secondary small', onclick: () => { traceLetterIndex = (traceLetterIndex + 1) % DATA.letters.length; navigate('phase1'); } }, 'Suivante →')));
+
+  root.appendChild(el('p', { class: 'trace-letter-label' }, `${letter.name_fr} ${done ? '⭐' : ''}`));
+
+  const size = Math.min(320, window.innerWidth - 60);
+  const canvas = el('canvas', { class: 'trace-canvas', width: String(size), height: String(size) });
+  root.appendChild(el('div', { class: 'trace-canvas-wrap' }, canvas));
+
+  const ctx = canvas.getContext('2d');
+  function drawGuide() {
+    ctx.clearRect(0, 0, size, size);
+    ctx.save();
+    ctx.globalAlpha = 0.28;
+    ctx.fillStyle = '#263149';
+    ctx.font = `${Math.round(size * 0.55)}px 'Amiri', serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.direction = 'rtl';
+    ctx.fillText(letter.letter, size / 2, size / 2 + size * 0.04);
+    ctx.restore();
+  }
+  drawGuide();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawGuide);
+
+  let drawing = false;
+  const colors = ['#14b8a6', '#ff9f1c', '#f472b6', '#a78bfa', '#60a5fa'];
+  const strokeColor = colors[traceLetterIndex % colors.length];
+  function pos(e) {
+    const rect = canvas.getBoundingClientRect();
+    return { x: (e.clientX - rect.left) * (size / rect.width), y: (e.clientY - rect.top) * (size / rect.height) };
+  }
+  canvas.addEventListener('pointerdown', (e) => {
+    drawing = true;
+    const p = pos(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!drawing) return;
+    const p = pos(e);
+    ctx.lineWidth = 12;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = strokeColor;
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+  });
+  const stop = () => { drawing = false; };
+  canvas.addEventListener('pointerup', stop);
+  canvas.addEventListener('pointerleave', stop);
+
+  root.appendChild(el('div', { class: 'trace-toolbar' },
+    el('button', { class: 'btn secondary', onclick: drawGuide }, '🧹 Effacer'),
+    el('button', { class: 'btn', onclick: () => speak(letter.example_word) }, '🔊 Écouter'),
+    el('button', {
+      class: 'btn', onclick: () => {
+        addUnique('lettersTraced', letter.order);
+        addXP(5);
+        confettiBurst();
+        setMascot('✍️', `Bien tracé, ${letter.name_fr} !`);
+        traceLetterIndex = (traceLetterIndex + 1) % DATA.letters.length;
+        navigate('phase1');
+      },
+    }, 'J’ai fini ! ✅')));
 }
 
 function renderAlphabetSection(root) {
@@ -1074,7 +1251,70 @@ function renderVocabSection(root) {
   root.appendChild(card);
   const best = PROGRESS.vocabQuizBest[category.id];
   if (best !== undefined) root.appendChild(el('p', { class: 'phase-resource' }, `Meilleur score sur cette catégorie : ${best}%`));
-  root.appendChild(el('button', { class: 'btn', onclick: () => { root.innerHTML = ''; renderVocabQuiz(root, category); } }, `Quiz : ${category.title}`));
+  root.appendChild(el('div', { style: 'display:flex;gap:10px;flex-wrap:wrap;' },
+    el('button', { class: 'btn', onclick: () => { root.innerHTML = ''; renderVocabQuiz(root, category); } }, `Quiz : ${category.title}`),
+    el('button', { class: 'btn secondary', onclick: () => { root.innerHTML = ''; renderMemoryGame(root, category); } }, '🧠 Jeu de mémoire')));
+}
+
+function renderMemoryGame(root, category) {
+  root.appendChild(el('h2', { style: 'margin-top:0' }, `Jeu de mémoire — ${category.title}`));
+  root.appendChild(el('p', { class: 'lead' }, "Retrouve les paires : un mot arabe et sa traduction française."));
+  const pairs = sample(category.words, Math.min(6, category.words.length));
+  const cards = shuffle(pairs.flatMap((w, i) => [
+    { pairId: i, kind: 'ar', content: w.ar },
+    { pairId: i, kind: 'fr', content: w.fr },
+  ]));
+
+  const stats = el('div', { class: 'memory-stats' }, `Coups : 0 · Paires trouvées : 0 / ${pairs.length}`);
+  root.appendChild(stats);
+  const grid = el('div', { class: 'memory-grid' });
+  root.appendChild(grid);
+
+  const state = { first: null, second: null, moves: 0, found: 0, lock: false };
+  function updateStats() { stats.textContent = `Coups : ${state.moves} · Paires trouvées : ${state.found} / ${pairs.length}`; }
+
+  cards.forEach((c, idx) => {
+    const backClass = c.kind === 'ar' ? 'memory-back ar-side' : 'memory-back';
+    const cardEl = el('div', { class: 'memory-card' },
+      el('div', { class: 'memory-inner' },
+        el('div', { class: 'memory-front' }, '🐫'),
+        el('div', { class: backClass }, c.content)));
+    cardEl.addEventListener('click', () => {
+      if (state.lock || cardEl.classList.contains('flipped') || cardEl.classList.contains('matched')) return;
+      cardEl.classList.add('flipped');
+      if (state.first === null) { state.first = { idx, el: cardEl, data: c }; return; }
+      state.second = { idx, el: cardEl, data: c };
+      state.moves += 1;
+      state.lock = true;
+      updateStats();
+      const isMatch = state.first.data.pairId === state.second.data.pairId && state.first.data.kind !== state.second.data.kind;
+      setTimeout(() => {
+        if (isMatch) {
+          state.first.el.classList.add('matched');
+          state.second.el.classList.add('matched');
+          state.found += 1;
+          playCorrectSound();
+          updateStats();
+          if (state.found === pairs.length) {
+            confettiBurst();
+            addXP(20);
+            updateProgress({ memoryGamesWon: PROGRESS.memoryGamesWon + 1 });
+            checkBadges();
+            setMascot('🧠', 'Bravo, toutes les paires trouvées !');
+            root.appendChild(el('p', { class: 'phase-resource' }, `🎉 Terminé en ${state.moves} coups !`));
+          }
+        } else {
+          playWrongSound();
+          state.first.el.classList.remove('flipped');
+          state.second.el.classList.remove('flipped');
+        }
+        state.first = null; state.second = null; state.lock = false;
+      }, 700);
+    });
+    grid.appendChild(cardEl);
+  });
+
+  root.appendChild(el('button', { class: 'btn secondary', style: 'margin-top:16px;', onclick: () => { root.innerHTML = ''; renderMemoryGame(root, category); } }, '🔄 Recommencer'));
 }
 
 function renderVocabQuiz(root, category) {
@@ -1327,6 +1567,90 @@ function startPhase4FinalQuiz(root) {
   });
 }
 
+/* =====================================================================
+   Badges et Défi du jour
+   ===================================================================== */
+
+function renderBadges(root) {
+  const lvl = levelInfo(PROGRESS.xp);
+  root.appendChild(el('h1', null, 'Mes badges 🏅'));
+  root.appendChild(el('p', { class: 'lead' }, `${lvl.title} · ${PROGRESS.xp} XP · série de ${PROGRESS.streak} jour(s) 🔥`));
+  root.appendChild(el('p', { class: 'lead' }, `${PROGRESS.badges.length} / ${BADGES.length} badges débloqués`));
+  const grid = el('div', { class: 'badges-grid' });
+  BADGES.forEach(b => {
+    const unlocked = PROGRESS.badges.includes(b.id);
+    grid.appendChild(el('div', { class: `badge-tile ${unlocked ? 'unlocked' : 'locked'}` },
+      el('span', { class: 'badge-icon' }, b.icon),
+      el('span', { class: 'badge-label' }, b.label)));
+  });
+  root.appendChild(grid);
+}
+
+function buildDailyChallengeQuestions() {
+  const parts = [];
+  if (DATA.letters.length) {
+    parts.push(...sample(DATA.letters, Math.min(2, DATA.letters.length)).map(letter => {
+      const forms = letterForms(letter.letter, letter.connects);
+      const formKeys = letter.connects ? ['isolated', 'initial', 'medial', 'final'] : ['isolated', 'final'];
+      const formKey = formKeys[Math.floor(Math.random() * formKeys.length)];
+      const distractors = sample(DATA.letters.filter(l => l.order !== letter.order), 3).map(l => l.name_fr);
+      const options = shuffle([letter.name_fr, ...distractors]);
+      return { prompt: forms[formKey], options, correctIndex: options.indexOf(letter.name_fr) };
+    }));
+  }
+  const harakatCombos = [];
+  DATA.simpleLetters.forEach(letter => DATA.harakat.forEach((h, vi) => harakatCombos.push({ letter, mark: h.mark, sound: CONSONANT_SOUND[letter] + VOWEL_SOUND[vi] })));
+  if (harakatCombos.length) {
+    parts.push(...sample(harakatCombos, 2).map(c => {
+      const distractors = sample(harakatCombos.filter(x => x.sound !== c.sound), 3).map(x => x.sound);
+      const options = shuffle([...new Set([c.sound, ...distractors])]);
+      while (options.length < 4) options.push(c.sound + "'");
+      return { prompt: c.letter + c.mark, options, correctIndex: options.indexOf(c.sound) };
+    }));
+  }
+  const allVocab = DATA.phase3.vocab_categories.flatMap(c => c.words);
+  if (allVocab.length) {
+    parts.push(...mcqFromList(sample(allVocab, Math.min(3, allVocab.length)), {
+      getPrompt: (w) => w.ar, getCorrectValue: (w) => w.fr, distractorPool: allVocab.map(w => w.fr),
+    }));
+  }
+  const allRootWords = DATA.phase3.roots.flatMap(r => r.words.map(w => ({ ...w, root: r.root })));
+  if (allRootWords.length) {
+    parts.push(...mcqFromList(sample(allRootWords, Math.min(2, allRootWords.length)), {
+      getPrompt: (w) => w.ar, getCorrectValue: (w) => w.root, distractorPool: DATA.phase3.roots.map(r => r.root),
+    }));
+  }
+  if (DATA.phase2.pronouns.length) {
+    parts.push(...mcqFromList(sample(DATA.phase2.pronouns, Math.min(1, DATA.phase2.pronouns.length)), {
+      getPrompt: (p) => p.ar, getCorrectValue: (p) => p.fr, distractorPool: DATA.phase2.pronouns.map(p => p.fr),
+    }));
+  }
+  return shuffle(parts);
+}
+
+function renderDefi(root) {
+  const today = new Date().toISOString().slice(0, 10);
+  const doneToday = PROGRESS.lastChallengeDate === today;
+  root.appendChild(el('h1', null, 'Défi du jour 🎯'));
+  root.appendChild(el('p', { class: 'lead' }, "Un mini-quiz surprise qui mélange tout ce que tu as appris — reviens chaque jour !"));
+  if (doneToday) {
+    root.appendChild(el('div', { class: 'card' }, el('p', null, '✅ Défi déjà relevé aujourd’hui, reviens demain pour un nouveau défi !')));
+    return;
+  }
+  root.appendChild(el('button', { class: 'btn', onclick: () => { const c = el('div'); root.appendChild(c); startDailyChallenge(c); } }, 'Commencer le défi'));
+}
+
+function startDailyChallenge(root) {
+  const questions = buildDailyChallengeQuestions();
+  const today = new Date().toISOString().slice(0, 10);
+  runQuiz(root, questions, {
+    passThreshold: 60,
+    passMessage: 'Défi du jour réussi, à demain pour un nouveau défi !',
+    failMessage: 'Défi tenté ! Reviens demain pour un nouveau défi.',
+    onFinish: () => updateProgress({ lastChallengeDate: today }),
+  });
+}
+
 /* ---------- Init ---------- */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1338,5 +1662,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   document.getElementById('mascot-face').addEventListener('click', mascotRandomTip);
   await loadData();
+  updateStreak();
   navigate('accueil');
 });

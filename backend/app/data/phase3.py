@@ -1,10 +1,70 @@
 """Contenu pédagogique de la Phase 3 : vocabulaire et lecture.
 
-Le vocabulaire est un socle de départ (~140 mots) organisé par thème,
+Le vocabulaire est un socle de départ (~180 mots) organisé par thème,
 à enrichir progressivement vers l'objectif des 500 mots les plus fréquents.
 """
 
 VOCAB_CATEGORIES = [
+    {
+        "id": "salutations", "title": "Salutations et phrases utiles", "title_ar": "التَّحِيَّات",
+        "words": [
+            {"ar": "مَرْحَبًا", "translit": "marḥaban", "fr": "bonjour / salut"},
+            {"ar": "السَّلَامُ عَلَيْكُم", "translit": "as-salāmu ʿalaykum", "fr": "la paix soit sur vous (salut)"},
+            {"ar": "صَبَاحُ الْخَيْرِ", "translit": "ṣabāḥu al-khayr", "fr": "bonjour (le matin)"},
+            {"ar": "مَسَاءُ الْخَيْرِ", "translit": "masā’u al-khayr", "fr": "bonsoir"},
+            {"ar": "مَعَ السَّلَامَةِ", "translit": "maʿa as-salāma", "fr": "au revoir"},
+            {"ar": "شُكْرًا", "translit": "shukran", "fr": "merci"},
+            {"ar": "مِنْ فَضْلِكَ", "translit": "min faḍlika", "fr": "s'il te plaît"},
+            {"ar": "نَعَمْ", "translit": "naʿam", "fr": "oui"},
+            {"ar": "لَا", "translit": "lā", "fr": "non"},
+            {"ar": "آسِف", "translit": "āsif", "fr": "désolé"},
+            {"ar": "كَيْفَ حَالُكَ", "translit": "kayfa ḥāluka", "fr": "comment vas-tu ?"},
+            {"ar": "بِخَيْر", "translit": "bikhayr", "fr": "je vais bien"},
+        ],
+    },
+    {
+        "id": "animaux", "title": "Les animaux", "title_ar": "الحَيَوَانَات",
+        "words": [
+            {"ar": "قِطَّة", "translit": "qiṭṭa", "fr": "chat"},
+            {"ar": "كَلْب", "translit": "kalb", "fr": "chien"},
+            {"ar": "أَسَد", "translit": "asad", "fr": "lion"},
+            {"ar": "فِيل", "translit": "fīl", "fr": "éléphant"},
+            {"ar": "حِصَان", "translit": "ḥiṣān", "fr": "cheval"},
+            {"ar": "طَائِر", "translit": "ṭā’ir", "fr": "oiseau"},
+            {"ar": "سَمَكَة", "translit": "samaka", "fr": "poisson"},
+            {"ar": "دَجَاجَة", "translit": "dajāja", "fr": "poule"},
+            {"ar": "بَقَرَة", "translit": "baqara", "fr": "vache"},
+            {"ar": "خَرُوف", "translit": "kharūf", "fr": "mouton"},
+            {"ar": "أَرْنَب", "translit": "arnab", "fr": "lapin"},
+            {"ar": "قِرْد", "translit": "qird", "fr": "singe"},
+        ],
+    },
+    {
+        "id": "ecole", "title": "L'école", "title_ar": "المَدْرَسَة",
+        "words": [
+            {"ar": "دَفْتَر", "translit": "daftar", "fr": "cahier"},
+            {"ar": "مِسْطَرَة", "translit": "misṭara", "fr": "règle"},
+            {"ar": "حَقِيبَة", "translit": "ḥaqība", "fr": "cartable"},
+            {"ar": "سَبُّورَة", "translit": "sabbūra", "fr": "tableau"},
+            {"ar": "مِقَصّ", "translit": "miqaṣṣ", "fr": "ciseaux"},
+            {"ar": "غِرَاء", "translit": "ghirā’", "fr": "colle"},
+            {"ar": "أَلْوَان", "translit": "alwān", "fr": "crayons de couleur"},
+            {"ar": "صَفّ", "translit": "ṣaff", "fr": "classe"},
+            {"ar": "مِمْحَاة", "translit": "mimḥāh", "fr": "gomme"},
+        ],
+    },
+    {
+        "id": "vetements", "title": "Les vêtements", "title_ar": "المَلَابِس",
+        "words": [
+            {"ar": "قَمِيص", "translit": "qamīṣ", "fr": "chemise"},
+            {"ar": "سِرْوَال", "translit": "sirwāl", "fr": "pantalon"},
+            {"ar": "فُسْتَان", "translit": "fustān", "fr": "robe"},
+            {"ar": "حِذَاء", "translit": "ḥidhā’", "fr": "chaussure"},
+            {"ar": "قُبَّعَة", "translit": "qubbaʿa", "fr": "chapeau"},
+            {"ar": "جَوْرَب", "translit": "jawrab", "fr": "chaussette"},
+            {"ar": "مِعْطَف", "translit": "miʿṭaf", "fr": "manteau"},
+        ],
+    },
     {
         "id": "famille", "title": "La famille", "title_ar": "الأُسْرَة",
         "words": [

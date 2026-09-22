@@ -57,6 +57,18 @@ body {
 }
 
 .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.xp-widget { display: flex; gap: 8px; margin-left: auto; }
+.xp-pill {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  background: var(--purple);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 999px;
+  box-shadow: 0 3px 0 rgba(0,0,0,.12);
+}
+.xp-pill.streak { background: var(--accent-2); }
 .brand-emoji { font-size: 1.8rem; animation: bounce-idle 2.4s ease-in-out infinite; }
 .brand-ar { font-family: var(--font-ar); font-size: 1.6rem; color: var(--accent-2); direction: rtl; }
 .brand-fr { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--text); }
@@ -378,7 +390,43 @@ p.lead { color: var(--text-dim); margin-top: 0; }
 @keyframes bubble-in { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes confetti-fall { to { transform: translateY(110vh) rotate(540deg); opacity: 0.2; } }
 
+/* Badges */
+.badges-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 14px; }
+.badge-tile { background: var(--card); border: 3px solid var(--border); border-radius: 16px; padding: 14px 10px; text-align: center; }
+.badge-tile .badge-icon { font-size: 2.2rem; display: block; margin-bottom: 6px; }
+.badge-tile.unlocked { border-color: var(--yellow); background: #fffceb; }
+.badge-tile.locked { opacity: 0.45; filter: grayscale(1); }
+.badge-tile .badge-label { font-size: 0.78rem; font-weight: 700; }
+
+/* Memory game */
+.memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-width: 620px; margin: 0 auto; perspective: 800px; }
+.memory-card { aspect-ratio: 1; cursor: pointer; }
+.memory-inner {
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d; transition: transform .4s;
+  border-radius: 14px;
+}
+.memory-card.flipped .memory-inner { transform: rotateY(180deg); }
+.memory-front, .memory-back {
+  position: absolute; inset: 0; backface-visibility: hidden;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 14px; border: 3px solid var(--border); padding: 6px;
+  text-align: center; font-weight: 700;
+}
+.memory-front { background: linear-gradient(135deg, var(--purple), var(--blue)); font-size: 1.8rem; }
+.memory-back { background: var(--card); transform: rotateY(180deg); font-size: 0.95rem; }
+.memory-back.ar-side { font-family: var(--font-ar); font-size: 1.5rem; direction: rtl; color: var(--accent-dark); }
+.memory-card.matched .memory-back { border-color: var(--success); background: #eafff2; }
+.memory-stats { text-align: center; margin-bottom: 14px; font-family: var(--font-display); font-weight: 700; color: var(--text-dim); }
+
+/* Letter tracing */
+.trace-toolbar { display: flex; justify-content: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+.trace-canvas-wrap { display: flex; justify-content: center; margin-bottom: 14px; }
+.trace-canvas { background: #fff; border: 4px dashed var(--accent); border-radius: 24px; touch-action: none; cursor: crosshair; }
+.trace-letter-label { text-align: center; font-family: var(--font-display); font-weight: 700; margin-bottom: 6px; }
+
 @media (max-width: 600px) {
+  .memory-grid { grid-template-columns: repeat(3, 1fr); }
   .letter-detail-header { flex-direction: column; align-items: flex-start; }
   .haraka-example { margin-left: 0; text-align: left; direction: ltr; }
   .list-row .fr-cell { margin-left: 0; text-align: left; }
