@@ -99,8 +99,12 @@ function starsForPct(pct) {
 }
 
 const DATA = {
-  letters: [], harakat: [], longVowels: [], tanwin: [], simpleLetters: [], readingWords: [], curriculum: [],
-  phase2: { pronouns: [], gender_number: [], nominal_sentences: [], verbal_sentences: [], cases: [] },
+  letters: [], harakat: [], longVowels: [], specialSigns: [], solarLunar: [], tanwin: [], simpleLetters: [], readingWords: [], curriculum: [],
+  phase2: {
+    pronouns: [], affix_pronouns: [], demonstratives: [], gender_number: [], idafa_examples: [],
+    nominal_sentences: [], verbal_sentences: [], verb_conjugation: { root: '', meaning_fr: '', past: [], present: [] },
+    cases: [], prepositions: [], question_words: [], coordination: [], negation: [],
+  },
   phase3: { vocab_categories: [], reading_texts: [], roots: [] },
   phase4: { proverbs: [], poetry: [], morphology_forms: [], rhetoric_figures: [], quran_texts: [] },
 };
@@ -114,14 +118,21 @@ function defaultProgress() {
     lettersSeen: [], lettersQuizBest: 0,
     harakatQuizDone: false, harakatQuizBest: 0,
     tanwinQuizDone: false, tanwinQuizBest: 0,
+    signsQuizDone: false, signsQuizBest: 0,
+    solarLunarQuizDone: false, solarLunarQuizBest: 0,
     readingLevel1Done: false, readingLevel2Done: false,
     finalQuizBest: 0, phase1Complete: false,
 
     pronounsQuizDone: false, pronounsQuizBest: 0,
+    affixPronounsQuizDone: false, affixPronounsQuizBest: 0,
+    demonstrativesQuizDone: false, demonstrativesQuizBest: 0,
     genderNumberQuizDone: false, genderNumberQuizBest: 0,
+    idafaQuizDone: false, idafaQuizBest: 0,
     nominalQuizDone: false, nominalQuizBest: 0,
     verbalQuizDone: false, verbalQuizBest: 0,
+    verbConjugationQuizDone: false, verbConjugationQuizBest: 0,
     casesQuizDone: false, casesQuizBest: 0,
+    motsOutilsQuizDone: false, motsOutilsQuizBest: 0,
     phase2FinalBest: 0, phase2Complete: false,
 
     vocabCategoriesDone: [], vocabQuizBest: {},
@@ -311,6 +322,8 @@ async function loadData() {
   DATA.letters = letters;
   DATA.harakat = harakatRes.harakat;
   DATA.longVowels = harakatRes.long_vowels;
+  DATA.specialSigns = harakatRes.special_signs;
+  DATA.solarLunar = harakatRes.solar_lunar;
   DATA.tanwin = tanwin;
   DATA.simpleLetters = reading.simple_letters;
   DATA.readingWords = reading.words;
@@ -592,6 +605,7 @@ function renderPhase1(root) {
       { key: 'tracer', label: 'Tracer ✍️', done: PROGRESS.lettersTraced.length >= DATA.letters.length },
       { key: 'harakat', label: 'Harakat' },
       { key: 'tanwin', label: 'Tanwin' },
+      { key: 'signes', label: 'Autres signes' },
       { key: 'lecture', label: 'Lecture' },
       { key: 'quiz', label: 'Quiz final', done: PROGRESS.phase1Complete },
     ],
@@ -602,6 +616,7 @@ function renderPhase1(root) {
       else if (phase1Tab === 'tracer') renderTracerSection(content);
       else if (phase1Tab === 'harakat') renderHarakatSection(content);
       else if (phase1Tab === 'tanwin') renderTanwinSection(content);
+      else if (phase1Tab === 'signes') renderSignsSection(content);
       else if (phase1Tab === 'lecture') renderLectureSection(content);
       else renderQuizFinalIntro(content);
     },
@@ -842,6 +857,70 @@ function renderTanwinQuiz(root) {
   });
 }
 
+function renderSignsSection(root) {
+  root.appendChild(el('p', { class: 'lead' }, "D'autres signes complètent l'écriture arabe."));
+  const table = el('div', { class: 'card' });
+  DATA.specialSigns.forEach(s => {
+    table.appendChild(el('div', { class: 'haraka-row' },
+      el('div', { class: 'mark-display' }, TATWEEL + s.mark),
+      el('div', { class: 'haraka-info' }, el('span', { class: 'name-ar' }, s.name_ar), el('span', { class: 'name-fr' }, `${s.name_fr} — ${s.sound_fr}`)),
+      el('div', { class: 'haraka-example' }, s.example_word, el('span', { class: 'translit' }, `${s.example_translit} — ${s.example_fr}`)),
+      listenBtn(s.example_word)));
+  });
+  root.appendChild(table);
+  root.appendChild(el('button', { class: 'btn', onclick: () => { root.innerHTML = ''; renderSignsQuiz(root); } }, 'Commencer le quiz'));
+
+  root.appendChild(el('h2', null, 'Lettres solaires et lunaires'));
+  root.appendChild(el('p', { class: 'lead' },
+    "Quand on ajoute l'article ال devant un mot, le ل se prononce normalement devant une lettre lunaire (قمرية), mais s'assimile et disparaît à l'oral devant une lettre solaire (شمسية) — la consonne suivante est alors doublée."));
+  const slTable = el('div', { class: 'card' });
+  DATA.solarLunar.forEach(w => {
+    slTable.appendChild(el('div', { class: 'list-row' },
+      el('span', { class: 'ar-cell' }, w.word),
+      el('span', { class: 'translit-cell' }, `${w.translit} — ${w.fr}`),
+      el('span', { class: 'fr-cell', style: `color:${w.type === 'solar' ? 'var(--danger)' : 'var(--blue)'}` }, w.type === 'solar' ? '☀️ solaire' : '🌙 lunaire'),
+      listenBtn(w.word)));
+  });
+  root.appendChild(slTable);
+  root.appendChild(el('button', { class: 'btn', onclick: () => { root.innerHTML = ''; renderSolarLunarQuiz(root); } }, 'Commencer le quiz'));
+
+  root.appendChild(el('h2', null, 'La liaison (hamzat al-wasl)'));
+  root.appendChild(el('p', { class: 'card' },
+    "Quand un mot qui commence par ا (sans hamza écrite) suit un autre mot, ce ا ne se prononce pas : on enchaîne directement. Par exemple, ",
+    el('span', { style: 'font-family:var(--font-ar);font-size:1.3rem;direction:rtl;' }, 'فِي البَيْتِ'),
+    ' se prononce « fil-bayti » et non « fi al-bayti ».'));
+}
+
+function renderSignsQuiz(root) {
+  const items = DATA.specialSigns;
+  const allNames = items.map(s => s.name_fr);
+  const questions = mcqFromList(items, {
+    getPrompt: (s) => s.example_word, promptClass: 'small-prompt',
+    getCorrectValue: (s) => s.name_fr, distractorPool: allNames,
+  });
+  runQuiz(root, questions, {
+    passThreshold: 70,
+    passMessage: 'Ces signes n’ont plus de secret pour toi !',
+    failMessage: 'Revois le tableau des signes puis réessaie.',
+    onFinish: (pct, pass) => updateProgress({ signsQuizBest: Math.max(PROGRESS.signsQuizBest, pct), signsQuizDone: PROGRESS.signsQuizDone || pass }),
+  });
+}
+
+function renderSolarLunarQuiz(root) {
+  const items = sample(DATA.solarLunar, Math.min(10, DATA.solarLunar.length));
+  const questions = items.map(w => {
+    const options = ['☀️ Lettre solaire', '🌙 Lettre lunaire'];
+    const correctIndex = w.type === 'solar' ? 0 : 1;
+    return { prompt: w.word, options, correctIndex };
+  });
+  runQuiz(root, questions, {
+    passThreshold: 70,
+    passMessage: 'Tu maîtrises les lettres solaires et lunaires !',
+    failMessage: 'Revois les exemples puis réessaie.',
+    onFinish: (pct, pass) => updateProgress({ solarLunarQuizBest: Math.max(PROGRESS.solarLunarQuizBest, pct), solarLunarQuizDone: PROGRESS.solarLunarQuizDone || pass }),
+  });
+}
+
 function renderLectureSection(root) {
   root.appendChild(el('p', { class: 'lead' }, "Entraîne-toi à lire à voix haute, puis vérifie-toi."));
   root.appendChild(el('div', { class: 'level-select' },
@@ -960,20 +1039,30 @@ function renderPhase2(root) {
     lead: '3 à 6 mois : pronoms, genre et nombre, phrase nominale/verbale, cas grammaticaux.',
     tabs: [
       { key: 'pronoms', label: 'Pronoms', done: PROGRESS.pronounsQuizDone },
+      { key: 'pronoms-affixes', label: 'Pronoms affixes', done: PROGRESS.affixPronounsQuizDone },
+      { key: 'demonstratifs', label: 'Démonstratifs', done: PROGRESS.demonstrativesQuizDone },
       { key: 'genre-nombre', label: 'Genre & nombre', done: PROGRESS.genderNumberQuizDone },
+      { key: 'annexion', label: 'Annexion', done: PROGRESS.idafaQuizDone },
       { key: 'phrase-nominale', label: 'Phrase nominale', done: PROGRESS.nominalQuizDone },
       { key: 'phrase-verbale', label: 'Phrase verbale', done: PROGRESS.verbalQuizDone },
+      { key: 'verbe', label: 'Le verbe', done: PROGRESS.verbConjugationQuizDone },
       { key: 'cas', label: 'Cas grammaticaux', done: PROGRESS.casesQuizDone },
+      { key: 'mots-outils', label: 'Mots-outils', done: PROGRESS.motsOutilsQuizDone },
       { key: 'quiz', label: 'Quiz final', done: PROGRESS.phase2Complete },
     ],
     active: phase2Tab,
     onSelect: (k) => { phase2Tab = k; navigate('phase2'); },
     render: (content) => {
       if (phase2Tab === 'pronoms') renderPronounsSection(content);
+      else if (phase2Tab === 'pronoms-affixes') renderAffixPronounsSection(content);
+      else if (phase2Tab === 'demonstratifs') renderDemonstrativesSection(content);
       else if (phase2Tab === 'genre-nombre') renderGenderNumberSection(content);
+      else if (phase2Tab === 'annexion') renderIdafaSection(content);
       else if (phase2Tab === 'phrase-nominale') renderNominalSection(content);
       else if (phase2Tab === 'phrase-verbale') renderVerbalSection(content);
+      else if (phase2Tab === 'verbe') renderVerbConjugationSection(content);
       else if (phase2Tab === 'cas') renderCasesSection(content);
+      else if (phase2Tab === 'mots-outils') renderMotsOutilsSection(content);
       else renderPhase2QuizIntro(content);
     },
   });
@@ -1006,6 +1095,63 @@ function renderPronounsQuiz(root) {
     passMessage: 'Les pronoms personnels sont acquis !',
     failMessage: 'Revois le tableau des pronoms puis réessaie.',
     onFinish: (pct, pass) => updateProgress({ pronounsQuizBest: Math.max(PROGRESS.pronounsQuizBest, pct), pronounsQuizDone: PROGRESS.pronounsQuizDone || pass }),
+  });
+}
+
+function renderAffixPronounsSection(root) {
+  root.appendChild(el('p', { class: 'lead' },
+    "Les pronoms affixes (الضمائر المتصلة) s'attachent à la fin d'un nom pour indiquer un possesseur — un peu comme « mon », « ton », « son » en français."));
+  const table = el('div', { class: 'card' });
+  DATA.phase2.affix_pronouns.forEach(p => {
+    table.appendChild(el('div', { class: 'list-row' },
+      el('span', { class: 'ar-cell' }, p.example),
+      el('span', { class: 'translit-cell' }, `${p.example_translit} (${p.translit_suffix})`),
+      el('span', { class: 'fr-cell' }, p.example_fr),
+      listenBtn(p.example)));
+  });
+  root.appendChild(table);
+  root.appendChild(el('button', { class: 'btn', onclick: () => { root.innerHTML = ''; renderAffixPronounsQuiz(root); } }, 'Commencer le quiz'));
+}
+
+function renderAffixPronounsQuiz(root) {
+  const items = DATA.phase2.affix_pronouns;
+  const questions = mcqFromList(items, {
+    getPrompt: (p) => p.example, promptClass: 'small-prompt',
+    getCorrectValue: (p) => p.example_fr, distractorPool: items.map(p => p.example_fr),
+  });
+  runQuiz(root, questions, {
+    passThreshold: 70,
+    passMessage: 'Les pronoms affixes sont maîtrisés !',
+    failMessage: 'Revois le tableau puis réessaie.',
+    onFinish: (pct, pass) => updateProgress({ affixPronounsQuizBest: Math.max(PROGRESS.affixPronounsQuizBest, pct), affixPronounsQuizDone: PROGRESS.affixPronounsQuizDone || pass }),
+  });
+}
+
+function renderDemonstrativesSection(root) {
+  root.appendChild(el('p', { class: 'lead' }, "Les démonstratifs (أسماء الإشارة) servent à montrer quelqu'un ou quelque chose."));
+  const table = el('div', { class: 'card' });
+  DATA.phase2.demonstratives.forEach(d => {
+    table.appendChild(el('div', { class: 'list-row' },
+      el('span', { class: 'ar-cell' }, d.ar),
+      el('span', { class: 'translit-cell' }, `${d.translit} — ${d.fr}`),
+      el('span', { class: 'fr-cell' }, `${d.example} (${d.example_fr})`),
+      listenBtn(d.example)));
+  });
+  root.appendChild(table);
+  root.appendChild(el('button', { class: 'btn', onclick: () => { root.innerHTML = ''; renderDemonstrativesQuiz(root); } }, 'Commencer le quiz'));
+}
+
+function renderDemonstrativesQuiz(root) {
+  const items = DATA.phase2.demonstratives;
+  const questions = mcqFromList(items, {
+    getPrompt: (d) => d.ar,
+    getCorrectValue: (d) => d.fr, distractorPool: items.map(d => d.fr),
+  });
+  runQuiz(root, questions, {
+    passThreshold: 70,
+    passMessage: 'Les démonstratifs sont acquis !',
+    failMessage: 'Revois le tableau puis réessaie.',
+    onFinish: (pct, pass) => updateProgress({ demonstrativesQuizBest: Math.max(PROGRESS.demonstrativesQuizBest, pct), demonstrativesQuizDone: PROGRESS.demonstrativesQuizDone || pass }),
   });
 }
 
@@ -1051,6 +1197,37 @@ function renderGenderNumberQuiz(root) {
     passMessage: 'Les règles de genre et de nombre sont maîtrisées !',
     failMessage: 'Revois les exemples puis réessaie.',
     onFinish: (pct, pass) => updateProgress({ genderNumberQuizBest: Math.max(PROGRESS.genderNumberQuizBest, pct), genderNumberQuizDone: PROGRESS.genderNumberQuizDone || pass }),
+  });
+}
+
+function renderIdafaSection(root) {
+  root.appendChild(el('p', { class: 'lead' },
+    "L'annexion (الإضافة) relie deux noms pour exprimer une possession : le premier terme (مضاف, en vert) ne prend jamais l'article, le second (مضاف إليه, en orange) porte le sens de « de ». C'est l'équivalent du « de » français."));
+  const card = el('div', { class: 'card' });
+  DATA.phase2.idafa_examples.forEach(ex => {
+    const [w1, w2] = ex.phrase.split(' ');
+    card.appendChild(el('div', null,
+      el('div', { class: 'sentence-example' },
+        el('span', { class: 'role-a' }, w1), ' ',
+        el('span', { class: 'role-b' }, w2)),
+      el('p', { class: 'lead' }, `${ex.translit} — ${ex.fr}`)));
+  });
+  root.appendChild(card);
+  root.appendChild(el('p', { class: 'role-highlight-legend' },
+    el('span', null, el('span', { class: 'role-swatch', style: 'background:var(--accent)' }), 'مضاف (premier terme)'),
+    el('span', null, el('span', { class: 'role-swatch', style: 'background:var(--accent-2)' }), 'مضاف إليه (second terme, « de »)')));
+  root.appendChild(el('button', { class: 'btn', onclick: () => { root.innerHTML = ''; renderIdafaQuiz(root); } }, 'Commencer l’exercice'));
+}
+
+function renderIdafaQuiz(root) {
+  const mudafQs = wordRoleQuestions(DATA.phase2.idafa_examples.map(ex => ({ sentence: ex.phrase, mudaf: ex.mudaf })), 'mudaf', 'Quel mot est le مضاف (premier terme) ?');
+  const mudafIlayhiQs = wordRoleQuestions(DATA.phase2.idafa_examples.map(ex => ({ sentence: ex.phrase, mudaf_ilayhi: ex.mudaf_ilayhi })), 'mudaf_ilayhi', 'Quel mot est le مضاف إليه (second terme) ?');
+  const questions = shuffle([...mudafQs, ...mudafIlayhiQs]);
+  runQuiz(root, questions, {
+    passThreshold: 70,
+    passMessage: 'L’annexion (الإضافة) est maîtrisée !',
+    failMessage: 'Revois les exemples puis réessaie.',
+    onFinish: (pct, pass) => updateProgress({ idafaQuizBest: Math.max(PROGRESS.idafaQuizBest, pct), idafaQuizDone: PROGRESS.idafaQuizDone || pass }),
   });
 }
 
@@ -1129,6 +1306,55 @@ function renderVerbalQuiz(root) {
   });
 }
 
+function renderVerbConjugationSection(root) {
+  const v = DATA.phase2.verb_conjugation;
+  root.appendChild(el('p', { class: 'lead' }, `Conjuguer le verbe « ${v.meaning_fr} » (racine ${v.root}) au passé (الماضي) et au présent (المضارع).`));
+  root.appendChild(el('h2', { style: 'margin-top:0' }, 'Le passé (الماضي)'));
+  const pastCard = el('div', { class: 'card' });
+  v.past.forEach(c => {
+    pastCard.appendChild(el('div', { class: 'list-row' },
+      el('span', { class: 'ar-cell' }, c.pronoun),
+      el('span', { class: 'translit-cell' }, c.pronoun_fr),
+      el('span', { class: 'fr-cell', style: 'font-family:var(--font-ar);font-size:1.3rem;' }, c.form),
+      listenBtn(c.form)));
+  });
+  root.appendChild(pastCard);
+  root.appendChild(el('h2', null, 'Le présent (المضارع)'));
+  const presentCard = el('div', { class: 'card' });
+  v.present.forEach(c => {
+    presentCard.appendChild(el('div', { class: 'list-row' },
+      el('span', { class: 'ar-cell' }, c.pronoun),
+      el('span', { class: 'translit-cell' }, c.pronoun_fr),
+      el('span', { class: 'fr-cell', style: 'font-family:var(--font-ar);font-size:1.3rem;' }, c.form),
+      listenBtn(c.form)));
+  });
+  root.appendChild(presentCard);
+  root.appendChild(el('button', { class: 'btn', onclick: () => { root.innerHTML = ''; renderVerbConjugationQuiz(root); } }, 'Commencer le quiz'));
+}
+
+function renderVerbConjugationQuiz(root) {
+  const v = DATA.phase2.verb_conjugation;
+  const pastItems = v.past.map(c => ({ ...c, tenseLabel: 'passé' }));
+  const presentItems = v.present.map(c => ({ ...c, tenseLabel: 'présent' }));
+  const allItems = [...pastItems, ...presentItems];
+  const allForms = allItems.map(c => c.form);
+  const questions = allItems.map(c => {
+    const distractors = sample(allForms.filter(f => f !== c.form), 3);
+    const options = shuffle([...new Set([c.form, ...distractors])]);
+    while (options.length < 4) options.push(c.form + ' ');
+    return {
+      prompt: el('div', null, el('div', { class: 'lead' }, `${c.pronoun_fr} — ${c.tenseLabel}`), el('div', { class: 'example-word', style: 'margin-top:8px;' }, c.pronoun)),
+      options, correctIndex: options.indexOf(c.form),
+    };
+  });
+  runQuiz(root, shuffle(questions), {
+    passThreshold: 70,
+    passMessage: 'Tu conjugues bien ce verbe au passé et au présent !',
+    failMessage: 'Revois les tableaux de conjugaison puis réessaie.',
+    onFinish: (pct, pass) => updateProgress({ verbConjugationQuizBest: Math.max(PROGRESS.verbConjugationQuizBest, pct), verbConjugationQuizDone: PROGRESS.verbConjugationQuizDone || pass }),
+  });
+}
+
 function renderCasesSection(root) {
   root.appendChild(el('p', { class: 'lead' }, 'Les trois cas grammaticaux (الإعراب) marquent la fonction du mot dans la phrase.'));
   const card = el('div', { class: 'card' });
@@ -1161,6 +1387,56 @@ function renderCasesQuiz(root) {
   });
 }
 
+function motsOutilsPool() {
+  return [
+    ...DATA.phase2.prepositions.map(w => ({ ...w, group: 'préposition' })),
+    ...DATA.phase2.question_words.map(w => ({ ...w, group: 'mot interrogatif' })),
+    ...DATA.phase2.coordination.map(w => ({ ...w, group: 'coordination' })),
+  ];
+}
+
+function renderMotsOutilsSection(root) {
+  root.appendChild(el('p', { class: 'lead' }, "Les mots-outils reviennent dans presque toutes les phrases : prépositions, mots interrogatifs, mots de liaison et négation."));
+
+  root.appendChild(el('h2', { style: 'margin-top:0' }, 'Prépositions (حروف الجر)'));
+  const prepCard = el('div', { class: 'card' });
+  DATA.phase2.prepositions.forEach(p => prepCard.appendChild(el('div', { class: 'list-row' },
+    el('span', { class: 'ar-cell' }, p.ar), el('span', { class: 'translit-cell' }, p.translit), el('span', { class: 'fr-cell' }, p.fr), listenBtn(p.ar))));
+  root.appendChild(prepCard);
+
+  root.appendChild(el('h2', null, "Mots interrogatifs (أدوات الاستفهام)"));
+  const qCard = el('div', { class: 'card' });
+  DATA.phase2.question_words.forEach(p => qCard.appendChild(el('div', { class: 'list-row' },
+    el('span', { class: 'ar-cell' }, p.ar), el('span', { class: 'translit-cell' }, p.translit), el('span', { class: 'fr-cell' }, p.fr), listenBtn(p.ar))));
+  root.appendChild(qCard);
+
+  root.appendChild(el('h2', null, 'Coordination (حروف العطف)'));
+  const coordCard = el('div', { class: 'card' });
+  DATA.phase2.coordination.forEach(p => coordCard.appendChild(el('div', { class: 'list-row' },
+    el('span', { class: 'ar-cell' }, p.ar), el('span', { class: 'translit-cell' }, p.translit), el('span', { class: 'fr-cell' }, p.fr), listenBtn(p.ar))));
+  root.appendChild(coordCard);
+
+  root.appendChild(el('h2', null, 'La négation (النفي)'));
+  const negCard = el('div', { class: 'card' });
+  DATA.phase2.negation.forEach(p => negCard.appendChild(el('div', { class: 'list-row' },
+    el('span', { class: 'ar-cell' }, p.ar), el('span', { class: 'translit-cell' }, `${p.translit} — ${p.fr}`), el('span', { class: 'fr-cell' }, `${p.example} (${p.example_fr})`), listenBtn(p.example))));
+  root.appendChild(negCard);
+
+  root.appendChild(el('button', { class: 'btn', onclick: () => { root.innerHTML = ''; renderMotsOutilsQuiz(root); } }, 'Commencer le quiz'));
+}
+
+function renderMotsOutilsQuiz(root) {
+  const pool = motsOutilsPool();
+  const items = sample(pool, Math.min(10, pool.length));
+  const questions = mcqFromList(items, { getPrompt: (w) => w.ar, getCorrectValue: (w) => w.fr, distractorPool: pool.map(w => w.fr) });
+  runQuiz(root, questions, {
+    passThreshold: 70,
+    passMessage: 'Les mots-outils sont maîtrisés !',
+    failMessage: 'Revois les tableaux puis réessaie.',
+    onFinish: (pct, pass) => updateProgress({ motsOutilsQuizBest: Math.max(PROGRESS.motsOutilsQuizBest, pct), motsOutilsQuizDone: PROGRESS.motsOutilsQuizDone || pass }),
+  });
+}
+
 function renderPhase2QuizIntro(root) {
   root.appendChild(el('p', { class: 'lead' }, "Quiz combinant pronoms, genre/nombre, phrases nominale/verbale et cas grammaticaux. Score de 75% requis."));
   if (PROGRESS.phase2Complete) root.appendChild(el('p', { class: 'phase-resource' }, `Meilleur score : ${PROGRESS.phase2FinalBest}% — Phase 2 déjà validée !`));
@@ -1168,24 +1444,42 @@ function renderPhase2QuizIntro(root) {
 }
 
 function startPhase2FinalQuiz(root) {
-  const pronounQs = mcqFromList(sample(DATA.phase2.pronouns, 4), {
+  const pronounQs = mcqFromList(sample(DATA.phase2.pronouns, 3), {
     getPrompt: (p) => p.ar, getCorrectValue: (p) => p.fr, distractorPool: DATA.phase2.pronouns.map(p => p.fr),
   });
-  const genderItems = sample(DATA.phase2.gender_number, 4);
+  const affixItems = sample(DATA.phase2.affix_pronouns, 2);
+  const affixQs = mcqFromList(affixItems, {
+    getPrompt: (p) => p.example, promptClass: 'small-prompt',
+    getCorrectValue: (p) => p.example_fr, distractorPool: DATA.phase2.affix_pronouns.map(p => p.example_fr),
+  });
+  const demoQs = mcqFromList(sample(DATA.phase2.demonstratives, 2), {
+    getPrompt: (d) => d.ar, getCorrectValue: (d) => d.fr, distractorPool: DATA.phase2.demonstratives.map(d => d.fr),
+  });
+  const genderItems = sample(DATA.phase2.gender_number, 3);
   const genderQuestions = mcqFromList(genderItems, {
     getPrompt: () => null, getCorrectValue: (i) => i.target, distractorPool: DATA.phase2.gender_number.map(i => i.target),
   }).map((q, idx) => Object.assign(q, {
     prompt: el('div', null, el('div', { class: 'example-word' }, genderItems[idx].base), el('div', { class: 'lead', style: 'font-size:0.8rem;' }, genderItems[idx].type_label)),
   }));
+  const idafaQs = sample(wordRoleQuestions(DATA.phase2.idafa_examples.map(ex => ({ sentence: ex.phrase, mudaf: ex.mudaf })), 'mudaf', 'Quel mot est le مضاف ?'), 2);
   const nominalQs = sample(wordRoleQuestions(DATA.phase2.nominal_sentences, 'mubtada', 'Quel mot est le مبتدأ ?'), 2);
   const verbalQs = sample(wordRoleQuestions(DATA.phase2.verbal_sentences, 'fail', 'Quel mot est le فاعل ?'), 2);
+  const verbItems = sample([...DATA.phase2.verb_conjugation.past, ...DATA.phase2.verb_conjugation.present], 2);
+  const allVerbForms = [...DATA.phase2.verb_conjugation.past, ...DATA.phase2.verb_conjugation.present].map(c => c.form);
+  const verbQs = verbItems.map(c => {
+    const distractors = sample(allVerbForms.filter(f => f !== c.form), 3);
+    const options = shuffle([...new Set([c.form, ...distractors])]);
+    while (options.length < 4) options.push(c.form + ' ');
+    return { prompt: el('div', null, el('div', { class: 'lead' }, c.pronoun_fr), el('div', { class: 'example-word', style: 'margin-top:8px;' }, c.pronoun)), options, correctIndex: options.indexOf(c.form) };
+  });
   const caseNames = {};
   DATA.phase2.cases.forEach(c => { caseNames[c.case] = c.name_fr; });
   const options3 = DATA.phase2.cases.map(c => c.name_fr);
-  const caseQs = sample(CASE_QUIZ_WORDS, 5).map(item => ({
+  const caseQs = sample(CASE_QUIZ_WORDS, 4).map(item => ({
     prompt: item.word, options: options3, correctIndex: options3.indexOf(caseNames[item.case]),
   }));
-  const questions = shuffle([...pronounQs, ...genderQuestions, ...nominalQs, ...verbalQs, ...caseQs]);
+  const motsOutilsQs = mcqFromList(sample(motsOutilsPool(), 3), { getPrompt: (w) => w.ar, getCorrectValue: (w) => w.fr, distractorPool: motsOutilsPool().map(w => w.fr) });
+  const questions = shuffle([...pronounQs, ...affixQs, ...demoQs, ...genderQuestions, ...idafaQs, ...nominalQs, ...verbalQs, ...verbQs, ...caseQs, ...motsOutilsQs]);
   runQuiz(root, questions, {
     passThreshold: 75,
     passMessage: 'Félicitations, tu valides la Phase 2 ! Direction la Phase 3 : vocabulaire et lecture.',

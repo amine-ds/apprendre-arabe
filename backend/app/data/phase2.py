@@ -76,13 +76,116 @@ CASES = [
      "example": "الْكِتَابِ", "example_translit": "al-kitābi"},
 ]
 
+AFFIX_PRONOUNS = [
+    {"suffix": "ي", "translit_suffix": "-ī", "meaning": "mon / ma",
+     "example": "كِتَابِي", "example_translit": "kitābī", "example_fr": "mon livre"},
+    {"suffix": "كَ", "translit_suffix": "-ka", "meaning": "ton / ta (à un garçon)",
+     "example": "كِتَابُكَ", "example_translit": "kitābuka", "example_fr": "ton livre"},
+    {"suffix": "كِ", "translit_suffix": "-ki", "meaning": "ton / ta (à une fille)",
+     "example": "كِتَابُكِ", "example_translit": "kitābuki", "example_fr": "ton livre"},
+    {"suffix": "هُ", "translit_suffix": "-hu", "meaning": "son / sa (à lui)",
+     "example": "كِتَابُهُ", "example_translit": "kitābuhu", "example_fr": "son livre"},
+    {"suffix": "هَا", "translit_suffix": "-hā", "meaning": "son / sa (à elle)",
+     "example": "كِتَابُهَا", "example_translit": "kitābuhā", "example_fr": "son livre"},
+    {"suffix": "نَا", "translit_suffix": "-nā", "meaning": "notre",
+     "example": "كِتَابُنَا", "example_translit": "kitābunā", "example_fr": "notre livre"},
+    {"suffix": "كُمْ", "translit_suffix": "-kum", "meaning": "votre",
+     "example": "كِتَابُكُمْ", "example_translit": "kitābukum", "example_fr": "votre livre"},
+    {"suffix": "هُمْ", "translit_suffix": "-hum", "meaning": "leur",
+     "example": "كِتَابُهُمْ", "example_translit": "kitābuhum", "example_fr": "leur livre"},
+]
+
+DEMONSTRATIVES = [
+    {"ar": "هَذَا", "translit": "hādhā", "fr": "celui-ci / ce (masculin)",
+     "example": "هَذَا كِتَابٌ", "example_translit": "hādhā kitābun", "example_fr": "ceci est un livre"},
+    {"ar": "هَذِهِ", "translit": "hādhihi", "fr": "celle-ci / cette (féminin)",
+     "example": "هَذِهِ سَيَّارَةٌ", "example_translit": "hādhihi sayyāratun", "example_fr": "ceci est une voiture"},
+    {"ar": "ذَلِكَ", "translit": "dhālika", "fr": "celui-là (masculin, éloigné)",
+     "example": "ذَلِكَ بَيْتٌ", "example_translit": "dhālika baytun", "example_fr": "cela est une maison (là-bas)"},
+    {"ar": "تِلْكَ", "translit": "tilka", "fr": "celle-là (féminin, éloigné)",
+     "example": "تِلْكَ مَدْرَسَةٌ", "example_translit": "tilka madrasatun", "example_fr": "cela est une école (là-bas)"},
+    {"ar": "هَؤُلَاءِ", "translit": "hā'ulā'i", "fr": "ceux-ci / celles-ci (pluriel, proche)",
+     "example": "هَؤُلَاءِ أَطْفَالٌ", "example_translit": "hā'ulā'i aṭfālun", "example_fr": "ce sont des enfants"},
+]
+
+IDAFA_EXAMPLES = [
+    {"phrase": "بَيْتُ الرَّجُلِ", "translit": "baytu ar-rajuli", "fr": "la maison de l'homme",
+     "mudaf": "بَيْتُ", "mudaf_ilayhi": "الرَّجُلِ"},
+    {"phrase": "كِتَابُ الطَّالِبِ", "translit": "kitābu aṭ-ṭālibi", "fr": "le livre de l'étudiant",
+     "mudaf": "كِتَابُ", "mudaf_ilayhi": "الطَّالِبِ"},
+    {"phrase": "مَدْرَسَةُ الْبِنْتِ", "translit": "madrasatu al-binti", "fr": "l'école de la fille",
+     "mudaf": "مَدْرَسَةُ", "mudaf_ilayhi": "الْبِنْتِ"},
+    {"phrase": "بَابُ الْبَيْتِ", "translit": "bābu al-bayti", "fr": "la porte de la maison",
+     "mudaf": "بَابُ", "mudaf_ilayhi": "الْبَيْتِ"},
+]
+
+VERB_CONJUGATION = {
+    "root": "ك ت ب", "meaning_fr": "écrire",
+    "past": [
+        {"pronoun": "أَنَا", "pronoun_fr": "je", "form": "كَتَبْتُ", "translit": "katabtu"},
+        {"pronoun": "أَنْتَ", "pronoun_fr": "tu (garçon)", "form": "كَتَبْتَ", "translit": "katabta"},
+        {"pronoun": "أَنْتِ", "pronoun_fr": "tu (fille)", "form": "كَتَبْتِ", "translit": "katabti"},
+        {"pronoun": "هُوَ", "pronoun_fr": "il", "form": "كَتَبَ", "translit": "kataba"},
+        {"pronoun": "هِيَ", "pronoun_fr": "elle", "form": "كَتَبَتْ", "translit": "katabat"},
+        {"pronoun": "نَحْنُ", "pronoun_fr": "nous", "form": "كَتَبْنَا", "translit": "katabnā"},
+    ],
+    "present": [
+        {"pronoun": "أَنَا", "pronoun_fr": "je", "form": "أَكْتُبُ", "translit": "aktubu"},
+        {"pronoun": "أَنْتَ", "pronoun_fr": "tu (garçon)", "form": "تَكْتُبُ", "translit": "taktubu"},
+        {"pronoun": "أَنْتِ", "pronoun_fr": "tu (fille)", "form": "تَكْتُبِينَ", "translit": "taktubīna"},
+        {"pronoun": "هُوَ", "pronoun_fr": "il", "form": "يَكْتُبُ", "translit": "yaktubu"},
+        {"pronoun": "هِيَ", "pronoun_fr": "elle", "form": "تَكْتُبُ", "translit": "taktubu"},
+        {"pronoun": "نَحْنُ", "pronoun_fr": "nous", "form": "نَكْتُبُ", "translit": "naktubu"},
+    ],
+}
+
+PREPOSITIONS = [
+    {"ar": "فِي", "translit": "fī", "fr": "dans / en"},
+    {"ar": "عَلَى", "translit": "ʿalā", "fr": "sur"},
+    {"ar": "مِنْ", "translit": "min", "fr": "de / depuis"},
+    {"ar": "إِلَى", "translit": "ilā", "fr": "vers / à"},
+    {"ar": "مَعَ", "translit": "maʿa", "fr": "avec"},
+    {"ar": "تَحْتَ", "translit": "taḥta", "fr": "sous"},
+    {"ar": "فَوْقَ", "translit": "fawqa", "fr": "au-dessus de"},
+]
+
+QUESTION_WORDS = [
+    {"ar": "هَلْ", "translit": "hal", "fr": "est-ce que (réponse oui/non)"},
+    {"ar": "مَنْ", "translit": "man", "fr": "qui"},
+    {"ar": "مَاذَا", "translit": "mādhā", "fr": "quoi / qu'est-ce que"},
+    {"ar": "أَيْنَ", "translit": "ayna", "fr": "où"},
+    {"ar": "مَتَى", "translit": "matā", "fr": "quand"},
+    {"ar": "كَيْفَ", "translit": "kayfa", "fr": "comment"},
+    {"ar": "لِمَاذَا", "translit": "limādhā", "fr": "pourquoi"},
+]
+
+COORDINATION = [
+    {"ar": "وَ", "translit": "wa", "fr": "et"},
+    {"ar": "أَوْ", "translit": "aw", "fr": "ou"},
+    {"ar": "ثُمَّ", "translit": "thumma", "fr": "puis"},
+    {"ar": "لَكِنْ", "translit": "lākin", "fr": "mais"},
+]
+
+NEGATION = [
+    {"ar": "لَا", "translit": "lā", "fr": "ne...pas (au présent)",
+     "example": "لَا أَفْهَمُ", "example_translit": "lā afhamu", "example_fr": "je ne comprends pas"},
+    {"ar": "لَيْسَ", "translit": "laysa", "fr": "n'est pas (phrase nominale)",
+     "example": "الْبَيْتُ لَيْسَ كَبِيرًا", "example_translit": "al-baytu laysa kabīran", "example_fr": "la maison n'est pas grande"},
+    {"ar": "لَمْ", "translit": "lam", "fr": "ne...pas (au passé)",
+     "example": "لَمْ أَكْتُبْ", "example_translit": "lam aktub", "example_fr": "je n'ai pas écrit"},
+]
+
 CURRICULUM_PHASE2 = {
     "title": "Grammaire fondamentale (النحو)",
     "sections": [
-        "Les pronoms personnels",
+        "Les pronoms personnels (isolés et affixes)",
+        "Les démonstratifs",
         "Masculin / féminin, singulier / duel / pluriel",
+        "L'annexion (الإضافة)",
         "La phrase nominale (المبتدأ والخبر)",
         "La phrase verbale (الفعل والفاعل والمفعول)",
+        "Le verbe : passé et présent",
         "Les cas grammaticaux : marfūʿ, manṣūb, majrūr",
+        "Les mots-outils : prépositions, interrogation, coordination, négation",
     ],
 }

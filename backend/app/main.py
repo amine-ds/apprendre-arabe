@@ -10,13 +10,23 @@ from app.data.phase1 import (
     LONG_VOWELS,
     READING_WORDS,
     SIMPLE_LETTERS,
+    SOLAR_LUNAR_EXAMPLES,
+    SPECIAL_SIGNS,
     TANWIN,
 )
 from app.data.phase2 import (
+    AFFIX_PRONOUNS,
     CASES,
+    COORDINATION,
+    DEMONSTRATIVES,
     GENDER_NUMBER,
+    IDAFA_EXAMPLES,
+    NEGATION,
     NOMINAL_SENTENCES,
+    PREPOSITIONS,
     PRONOUNS,
+    QUESTION_WORDS,
+    VERB_CONJUGATION,
     VERBAL_SENTENCES,
 )
 from app.data.phase3 import READING_TEXTS, ROOTS, VOCAB_CATEGORIES
@@ -39,7 +49,12 @@ def get_letters():
 
 @app.get("/api/harakat")
 def get_harakat():
-    return {"harakat": HARAKAT, "long_vowels": LONG_VOWELS}
+    return {
+        "harakat": HARAKAT,
+        "long_vowels": LONG_VOWELS,
+        "special_signs": SPECIAL_SIGNS,
+        "solar_lunar": SOLAR_LUNAR_EXAMPLES,
+    }
 
 
 @app.get("/api/tanwin")
@@ -56,10 +71,18 @@ def get_reading():
 def get_phase2():
     return {
         "pronouns": PRONOUNS,
+        "affix_pronouns": AFFIX_PRONOUNS,
+        "demonstratives": DEMONSTRATIVES,
         "gender_number": GENDER_NUMBER,
+        "idafa_examples": IDAFA_EXAMPLES,
         "nominal_sentences": NOMINAL_SENTENCES,
         "verbal_sentences": VERBAL_SENTENCES,
+        "verb_conjugation": VERB_CONJUGATION,
         "cases": CASES,
+        "prepositions": PREPOSITIONS,
+        "question_words": QUESTION_WORDS,
+        "coordination": COORDINATION,
+        "negation": NEGATION,
     }
 
 

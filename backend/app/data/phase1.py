@@ -114,6 +114,39 @@ TANWIN = [
      "example_word": "كِتَابٍ", "example_translit": "kitābin"},
 ]
 
+# Signes complémentaires : sukūn, shadda, tā' marbūṭa, alif madda.
+SPECIAL_SIGNS = [
+    {"name_ar": "سُكُون", "name_fr": "sukūn", "mark": "ْ",
+     "sound_fr": "absence de voyelle : la consonne se prononce sèche, sans son après elle.",
+     "example_word": "يَكْتُبُ", "example_translit": "yaktubu", "example_fr": "il écrit"},
+    {"name_ar": "شَدَّة", "name_fr": "shadda", "mark": "ّ",
+     "sound_fr": "double la consonne : on la prononce deux fois plus longtemps.",
+     "example_word": "مُدَرِّس", "example_translit": "mudarris", "example_fr": "enseignant"},
+    {"name_ar": "تَاء مَرْبُوطَة", "name_fr": "tā' marbūṭa", "mark": "ة",
+     "sound_fr": "un « a » en fin de mot ; marque très souvent le féminin.",
+     "example_word": "مَدْرَسَة", "example_translit": "madrasa", "example_fr": "école"},
+    {"name_ar": "أَلِف مَدَّة", "name_fr": "alif madda", "mark": "آ",
+     "sound_fr": "un « a » long et appuyé, comme deux alif réunis.",
+     "example_word": "قُرْآن", "example_translit": "qur'ān", "example_fr": "Coran"},
+]
+
+# Exemples de mots avec l'article ال pour distinguer lettres solaires (assimilées
+# dans la prononciation) et lunaires (le ل de ال se prononce normalement).
+SOLAR_LUNAR_EXAMPLES = [
+    {"word": "الشَّمْس", "translit": "ash-shams", "fr": "le soleil", "type": "solar"},
+    {"word": "الرَّجُل", "translit": "ar-rajul", "fr": "l'homme", "type": "solar"},
+    {"word": "النَّهْر", "translit": "an-nahr", "fr": "la rivière", "type": "solar"},
+    {"word": "السَّمَك", "translit": "as-samak", "fr": "le poisson", "type": "solar"},
+    {"word": "الدَّرْس", "translit": "ad-dars", "fr": "la leçon", "type": "solar"},
+    {"word": "التُّفَّاحَة", "translit": "at-tuffāḥa", "fr": "la pomme", "type": "solar"},
+    {"word": "القَمَر", "translit": "al-qamar", "fr": "la lune", "type": "lunar"},
+    {"word": "الكِتَاب", "translit": "al-kitāb", "fr": "le livre", "type": "lunar"},
+    {"word": "البَيْت", "translit": "al-bayt", "fr": "la maison", "type": "lunar"},
+    {"word": "الغَابَة", "translit": "al-ghāba", "fr": "la forêt", "type": "lunar"},
+    {"word": "الحَدِيقَة", "translit": "al-ḥadīqa", "fr": "le jardin", "type": "lunar"},
+    {"word": "الوَلَد", "translit": "al-walad", "fr": "le garçon", "type": "lunar"},
+]
+
 # Lettres "simples" utilisées pour le niveau 1 de lecture syllabique
 # (formes claires, sons proches du français).
 SIMPLE_LETTERS = ["ب", "ت", "م", "ن", "ل", "ر", "س", "د", "ف", "ك"]

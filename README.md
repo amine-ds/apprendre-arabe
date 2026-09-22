@@ -4,8 +4,8 @@ Application d'apprentissage de l'arabe classique, basée sur le programme maroca
 
 ## Programme
 
-1. **L'alphabet et les bases** (4-6 semaines) — 28 lettres, harakat, voyelles longues, tanwin, lecture syllabique.
-2. **Grammaire fondamentale** (3-6 mois) — pronoms personnels, genre/nombre, phrase nominale/verbale, cas grammaticaux (مرفوع/منصوب/مجرور).
+1. **L'alphabet et les bases** (4-6 semaines) — 28 lettres, harakat, voyelles longues, tanwin, sukūn/shadda/tā' marbūṭa/alif madda, lettres solaires et lunaires, lecture syllabique.
+2. **Grammaire fondamentale** (3-6 mois) — pronoms personnels (isolés et affixes), démonstratifs, genre/nombre, l'annexion (الإضافة), phrase nominale/verbale, conjugaison du verbe (passé/présent), cas grammaticaux (مرفوع/منصوب/مجرور), mots-outils (prépositions, interrogation, coordination, négation).
 3. **Vocabulaire et lecture** (6-12 mois) — socle de ~180 mots répartis en 13 thèmes (salutations, animaux, école, vêtements, famille, nombres, couleurs, corps, nourriture, maison, temps, verbes, adjectifs — vers l'objectif des 500 mots les plus fréquents), 6 textes courts avec questions de compréhension, introduction aux racines trilitères.
 4. **Niveau avancé** — proverbes et un extrait de poésie classique, les 10 formes verbales (الصرف) et une introduction à la rhétorique (البلاغة), lecture d'Al-Fâtiha et Al-Ikhlâs avec glose linguistique mot-à-mot.
 
